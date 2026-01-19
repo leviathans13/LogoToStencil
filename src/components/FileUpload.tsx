@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useRef } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 
 interface FileUploadProps {
   onFileSelect: (file: File | null) => void;
@@ -9,15 +9,17 @@ interface FileUploadProps {
 
 export default function FileUpload({ onFileSelect, disabled = false }: FileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+    setError(null);
     
     if (file) {
       // Validate file type
       const validTypes = ["image/png", "image/jpeg", "image/jpg"];
       if (!validTypes.includes(file.type)) {
-        alert("Please upload a PNG or JPG file");
+        setError("Please upload a PNG or JPG file");
         onFileSelect(null);
         return;
       }
@@ -25,7 +27,7 @@ export default function FileUpload({ onFileSelect, disabled = false }: FileUploa
       // Validate file size (max 10MB)
       const maxSize = 10 * 1024 * 1024;
       if (file.size > maxSize) {
-        alert("File size should not exceed 10MB");
+        setError("File size should not exceed 10MB");
         onFileSelect(null);
         return;
       }
@@ -80,6 +82,15 @@ export default function FileUpload({ onFileSelect, disabled = false }: FileUploa
           </p>
         </div>
       </div>
+      
+      {error && (
+        <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
+          <svg className="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
     </div>
   );
 }
